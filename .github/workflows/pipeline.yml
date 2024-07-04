@@ -37,6 +37,23 @@ jobs:
       - name: trigger deployment
         if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
         run: curl https://api.render.com/deploy/srv-${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
+      - name: Test Success
+        uses: rjstone/discord-webhook-notify@v1.0.4
+        if: success()
+        with:
+          severity: info
+          text: A new version of Pokedex deployed
+          details: to "https://full-stack-open-pokedex-fvw6.onrender.com" by cool user
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+      - name: Test Failure
+        uses: rjstone/discord-webhook-notify@v1.0.4
+        if: failure()
+        with:
+          severity: error
+          text: Build failed
+          details: commit "commit" by random user broke the build :(
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+            
 
   a_test_job:
     runs-on: ubuntu-20.04
@@ -66,3 +83,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: patch
+  
+  
